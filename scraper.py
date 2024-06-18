@@ -74,7 +74,7 @@ for row in rows:
     for index, col in enumerate(columns):
         if index == 1:
             event_names.append((col.text).replace("\n", " "))
-print(event_names)
+
 data = []
 
 for i in range(numberOfEvents):
@@ -105,11 +105,7 @@ for i in range(numberOfEvents):
                 each_row.append(col.text)
             each_event.append(each_row)
         
-        data.append(each_event)
-            # for index, col in enumerate(columns):
-            #     # print(col.text)
-            #     if index == desired_column:
-            #         desired_column_data.append(col.text)
+        data.append([event_names[i], each_event])
 
 
         
@@ -117,22 +113,17 @@ for i in range(numberOfEvents):
         div = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "modal-footer")))
         link = div.find_element(by=By.ID, value='ctl00_ctl00_cphBaseBody_cphBody_eventNoticeboard_btnCloseModal')
         
-        # link = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, 'ctl00_ctl00_cphBaseBody_cphBody_eventNoticeboard_btnCloseModal')))
         link.click()
-        # print(2)
 
         time.sleep(1)
     except ElementClickInterceptedException as e:
         print("No cadets on event")
     except StaleElementReferenceException as e:
         print("Increase sleep time")
-    # except TimeoutException as e:
-    #     print("Probably only staff on event")
-    #     # close list
-    #     div = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "modal-footer")))
-    #     link = div.find_element(by=By.ID, value='ctl00_ctl00_cphBaseBody_cphBody_eventNoticeboard_btnCloseModal')
 
-print(data)
 
-print("end")
-time.sleep(500)
+# Example 2D array
+
+# Save 2D array to text file
+with open('data.txt', 'w') as file:
+    file.write(str(data))
