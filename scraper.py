@@ -10,12 +10,30 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, TimeoutException
 
 import time
-# Set up the WebDriver (make sure chromedriver is in your PATH)
-driver = webdriver.Chrome()
 
+
+from selenium.webdriver.chrome.options import Options
+
+options = webdriver.ChromeOptions()
+# options.add_argument("--headless")
+# options.add_argument("--no-sandbox")
+# options.add_argument("--disable-extensions")
+options.add_argument('--remote-debugging-pipe')
+
+# options.add_argument(r"--user-data-dir=/home/ben/.config/google-chrome/")
+# options.add_argument(r'--profile-directory=Default')
+
+driver = webdriver.Chrome(options=options)
+print("dw")
+# driver = webdriver.Chrome()
+
+print(1)
+# Set up the WebDriver (make sure chromedriver is in your PATH)
+# driver = webdriver.Chrome()
+print(1)
 # Open the login page
 driver.get("https://sms.bader.mod.uk/")
-
+print(1)
 # Find the username and password fields and fill them out
 username_field_1 = driver.find_element(By.NAME, "txtUsername")
 password_field_1 = driver.find_element(By.NAME, "txtPassword")
