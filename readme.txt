@@ -19,7 +19,7 @@ then run chromedriver using ./chromedriver and might see error like this:
 To solve this error, simply run: sudo apt-get install libnss3.
 
 DOCKER 
-Also need to create the .env file within the docker folder, then run:
+Also need to create the .env file within the docker/app folder, then run:
 
 sudo docker-compose build
 sudo docker-compose up
