@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, TimeoutException, NoSuchElementException
 
 import time
 
@@ -55,7 +55,7 @@ username_field_2.send_keys(personal_username)
 password_field_2.send_keys(personal_password)
 
 # submit 
-login_button = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "btnSubmit")))
+login_button = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.NAME, "btnSubmit")))
 login_button.click()
 
 # go to events page
@@ -72,12 +72,12 @@ driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBo
 
 
 
-select_entries = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, 'eventTable_length')))
+select_entries = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.NAME, 'eventTable_length')))
 select = Select(select_entries)
 # this changes the table to show all entries/events
 select.select_by_value('-1')
 
-numberOf = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, 'eventTable_info')))
+numberOf = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, 'eventTable_info')))
 numberOf_string = numberOf.text
 numberOf_split = numberOf_string.split(" ")
 numberOfEvents = int(numberOf_split[5])
@@ -95,23 +95,31 @@ for row in rows:
 data = []
 
 for i in range(numberOfEvents):
-    try:
+    try:        
         # click an individual event
-        link = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, 'ctl00_ctl00_cphBaseBody_cphBody_lvEventDetails_ctrl' + str(i) +'_lbAttendees')))
+        print(i)
+        link = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, 'ctl00_ctl00_cphBaseBody_cphBody_lvEventDetails_ctrl' + str(i) +'_lbAttendees')))
         link.click()
+
+
+
         try:
             # this changes the table to show all entries/events
-            select_entries = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, 'ctl00_ctl00_cphBaseBody_cphBody_eventNoticeboard_gvCadetsAttendees_length')))
+            select_entries = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.NAME, 'ctl00_ctl00_cphBaseBody_cphBody_eventNoticeboard_gvCadetsAttendees_length')))
             select = Select(select_entries)
             select.select_by_value('-1')
+
         except TimeoutException as e:
             print("Probably only staff on event")
 
         # get the table of names
-        div = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "modal-content")))
+        div = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, "modal-content")))
+        table = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//*/tbody")))
+        rows = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.TAG_NAME, "tr")))
+
         table = div.find_elements(by=By.XPATH, value='//*/tbody')
         rows = table[1].find_elements(by=By.TAG_NAME, value="tr")
-
+        
         # Column to choose by its index, say the second column in the table
         each_event = []
         for row in rows:
@@ -122,22 +130,27 @@ for i in range(numberOfEvents):
             each_event.append(each_row)
         
         data.append([event_names[i], each_event])
-
-
         
         # closes list
-        div = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "modal-footer")))
+        div = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, "modal-footer")))
         link = div.find_element(by=By.ID, value='ctl00_ctl00_cphBaseBody_cphBody_eventNoticeboard_btnCloseModal')
-        
         link.click()
 
-        time.sleep(0.5)
+        # change events table to show all events cus it resets every time close list
+        select_entries = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.NAME, 'eventTable_length')))
+        select = Select(select_entries)
+        # this changes the table to show all entries/events
+        select.select_by_value('-1')
+
+    # time.sleep(1)
+
     except ElementClickInterceptedException as e:
         print("No cadets on event")
-    except StaleElementReferenceException as e:
-        print("Increase sleep time")
+    # except StaleElementReferenceException as e:
+    #     print("Increase sleep time")
 
     print("Event ", i, "completed.")
+    time.sleep(1)
 
 # Save array to text file
 with open('data.txt', 'w') as file:
