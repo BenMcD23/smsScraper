@@ -24,16 +24,15 @@ options.add_argument('--remote-debugging-pipe')
 # options.add_argument(r'--profile-directory=Default')
 
 driver = webdriver.Chrome(options=options)
-print("dw")
+
 # driver = webdriver.Chrome()
 
-print(1)
 # Set up the WebDriver (make sure chromedriver is in your PATH)
 # driver = webdriver.Chrome()
-print(1)
+
 # Open the login page
 driver.get("https://sms.bader.mod.uk/")
-print(1)
+
 # Find the username and password fields and fill them out
 username_field_1 = driver.find_element(By.NAME, "txtUsername")
 password_field_1 = driver.find_element(By.NAME, "txtPassword")
@@ -66,8 +65,8 @@ driver.get("https://sms.bader.mod.uk/events/default.aspx")
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbAdultIC')[0].click();")
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbMyUnit')[0].click();")
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbAttending')[0].click();")
-driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbDraft')[0].click();")
-driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbPending')[0].click();")
+# driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbDraft')[0].click();")
+# driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbPending')[0].click();")
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$btnFilter')[0].click();")
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbToggleDisplay')[0].click();")
 
@@ -82,7 +81,7 @@ numberOf = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID
 numberOf_string = numberOf.text
 numberOf_split = numberOf_string.split(" ")
 numberOfEvents = int(numberOf_split[5])
-
+print("There are ", numberOfEvents, "events.")
 # get name of each event
 table = driver.find_elements(by=By.XPATH, value='//*/tbody')
 rows = table[0].find_elements(by=By.TAG_NAME, value="tr")
@@ -100,7 +99,6 @@ for i in range(numberOfEvents):
         # click an individual event
         link = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, 'ctl00_ctl00_cphBaseBody_cphBody_lvEventDetails_ctrl' + str(i) +'_lbAttendees')))
         link.click()
-        
         try:
             # this changes the table to show all entries/events
             select_entries = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, 'ctl00_ctl00_cphBaseBody_cphBody_eventNoticeboard_gvCadetsAttendees_length')))
@@ -133,15 +131,14 @@ for i in range(numberOfEvents):
         
         link.click()
 
-        time.sleep(1)
+        time.sleep(0.5)
     except ElementClickInterceptedException as e:
         print("No cadets on event")
     except StaleElementReferenceException as e:
         print("Increase sleep time")
 
+    print("Event ", i, "completed.")
 
-# Example 2D array
-
-# Save 2D array to text file
+# Save array to text file
 with open('data.txt', 'w') as file:
     file.write(str(data))
