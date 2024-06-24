@@ -4,10 +4,9 @@ from dotenv import load_dotenv
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, TimeoutException, NoSuchElementException
+from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, StaleElementReferenceException
 
 import time
 import csv
@@ -16,9 +15,9 @@ import csv
 from selenium.webdriver.chrome.options import Options
 
 options = webdriver.ChromeOptions()
-# options.add_argument("--headless")
-# options.add_argument("--no-sandbox")
-# options.add_argument("--disable-extensions")
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-extensions")
 options.add_argument('--remote-debugging-pipe')
 
 # options.add_argument(r"--user-data-dir=/home/ben/.config/google-chrome/")
@@ -62,12 +61,10 @@ login_button.click()
 # go to events page
 driver.get("https://sms.bader.mod.uk/events/default.aspx")
 
-# Click filter buttons to get only approved events
+# Click filter buttons to get certain events
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbAdultIC')[0].click();")
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbMyUnit')[0].click();")
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbAttending')[0].click();")
-# driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbDraft')[0].click();")
-# driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbPending')[0].click();")
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$btnFilter')[0].click();")
 driver.execute_script("document.getElementsByName('ctl00$ctl00$cphBaseBody$cphBody$cbToggleDisplay')[0].click();")
 
@@ -94,12 +91,12 @@ for row in rows:
             event_names.append((col.text).replace("\n", " "))
 
 data = []
-with open("test.csv", "wt") as fp:
+with open("cadet_events.csv", "wt") as fp:
     writer = csv.writer(fp)
-    # writer.writerow(["your", "header", "foo"])  # write header
     writer.writerows(data)
-    for i in range(2):
-        try:        
+    for i in range(numberOfEvents):
+        try:
+            writer.writerow([event_names[i]])
             # click an individual event
             link = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, 'ctl00_ctl00_cphBaseBody_cphBody_lvEventDetails_ctrl' + str(i) + '_lbAttendees')))
             link.click()
@@ -111,15 +108,14 @@ with open("test.csv", "wt") as fp:
                 select.select_by_value('-1')
 
             except TimeoutException as e:
-                print("Only staff on event")
+                pass
+                # only staff on event, no cadets
 
             # get the table of names
             div = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, "modal-content")))
             table = div.find_elements(by=By.XPATH, value='//*/tbody')
             rows = table[1].find_elements(by=By.TAG_NAME, value="tr")
             
-            writer.writerow([event_names[i]])
-            print(event_names[i])
             # Column to choose by its index, say the second column in the table
             each_event = []
             for row in rows:
@@ -128,11 +124,8 @@ with open("test.csv", "wt") as fp:
                 for col in columns:
                     each_row.append(col.text)
                 writer.writerow(each_row)
-                # each_event.append(each_row)
             
-            writer.writerow("")
-            # data.append([event_names[i], each_event])
-            # writer.writerow(each_event)
+            
 
             # closes list
             div = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, "modal-footer")))
@@ -145,14 +138,14 @@ with open("test.csv", "wt") as fp:
             # this changes the table to show all entries/events
             select.select_by_value('-1')
 
-        # time.sleep(1)
 
         except ElementClickInterceptedException as e:
-            print("No cadets on event")
+            writer.writerow(["None of your Cadets are attending this event."])
 
+        except StaleElementReferenceException as e:
+            print("Increase sleep time")
+        
         print("Event ", i+1 , "completed.")
-        time.sleep(1)
 
-# Save array to text file
-with open('data.txt', 'w') as file:
-    file.write(str(data))
+        writer.writerow("")
+        time.sleep(2)
